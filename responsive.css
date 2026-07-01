@@ -1,0 +1,114 @@
+/* Responsive overrides for mobile/tablet
+   - Stacked table rows on narrow screens
+   - Improved button stacking and spacing
+   - Container width adjustments
+*/
+
+/* Header / Topbar responsiveness across app */
+.topbar .custom-container { flex-wrap: wrap; align-items: center; gap: 12px; }
+.topbar .topbar-items { flex-wrap: wrap; }
+.custom-address-image img { max-height: 36px; height: auto; }
+
+@media (max-width: 760px) {
+    .custom-address-image { display: none; }
+    .topbar .topbar-items { width: 100%; justify-content: space-between; }
+    .topbar { padding: 8px 10px; min-height: auto; }
+    .topbar .header-topbar-text-1 { font-size: 14px; }
+}
+
+@media (max-width: 480px) {
+    .topbar { position: fixed; top:0; left:0; right:0; }
+    .topbar .custom-container { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .topbar .topbar-items { flex-direction: column; align-items: stretch; gap: 6px; }
+    .topbar .topbar-items .nav-item { display:flex; justify-content:space-between; }
+    .header-phone, .header-email { font-size: 13px; }
+    .faan-logo { width: 80px; }
+}
+
+@media (max-width: 900px) {
+    .login-container,
+    .dashboard-container,
+    .admin-container {
+        width: 95%;
+        max-width: 720px;
+        margin: 90px auto 16px auto;
+        padding: 16px;
+    }
+
+    .export-btn {
+        display: inline-block;
+        padding: 10px 14px;
+        margin-top: 12px;
+    }
+}
+
+@media (max-width: 800px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    table {
+        border: 0;
+    }
+
+    thead { display: none; }
+
+    tbody tr {
+        background: #fff;
+        margin: 0 0 14px 0;
+        padding: 12px 14px;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border: none;
+    }
+
+    table td:before {
+        content: attr(data-label);
+        flex: 0 0 45%;
+        font-weight: 600;
+        color: #333;
+        padding-right: 8px;
+    }
+
+    table td.actions, table td:last-child {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        flex: 1 1 55%;
+    }
+
+    .export-btn, .approve-btn, .reject-btn {
+        width: auto;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    body { padding-top: 64px; }
+
+    .topbar .custom-container { padding: 8px 10px; }
+    .topbar .topbar-items { gap: 8px; }
+
+    .login-container,
+    .dashboard-container,
+    .admin-container {
+        width: 98%;
+        margin: 88px auto 12px auto;
+        padding: 12px;
+    }
+
+    .export-btn { display: block; width: 100%; margin-top: 10px; }
+
+    table td:before { font-size: 13px; }
+}
+
+/* Utility */
+.btn-group { display:flex; gap:10px; flex-wrap:wrap; }
+.btn-group .export-btn { margin-top: 0; }

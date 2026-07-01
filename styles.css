@@ -1,0 +1,308 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Poppins', Arial, sans-serif;
+    background: #f4f4f4;
+    /* reserve space for the fixed topbar */
+    padding-top: 72px;
+}
+
+.login-container,
+.dashboard-container,
+.admin-container {
+    width: 90%;
+    max-width: 900px;
+    margin: 80px auto 40px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ccc;
+}
+
+h2, h3 {
+    text-align: center;
+    color: #003366;
+}
+
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    /* margin-top: 10px; */
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #003366;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background: #003366;
+    color: white;
+    padding: 3px;
+}
+
+.approve-btn {
+    background: green;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.reject-btn {
+    background: red;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+.export-btn {
+    margin-top: 20px;
+    background: #0066cc;
+    padding: 12px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Utility classes used by React components */
+.btn {
+    display: inline-block;
+    background: #003366;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Dashboard responsive layout: form + side panel */
+.dashboard-grid {
+    display: block;
+}
+
+@media (min-width: 800px) {
+    .dashboard-grid {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+    .booking-form {
+        flex: 1 1 60%;
+    }
+    .booking-panel {
+        width: 35%;
+        max-height: 60vh;
+        overflow-y: auto;
+        background: #fafafa;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 0 6px rgba(0,0,0,0.05);
+    }
+}
+
+.booking-card {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-access-btn {
+    margin-left: 8px;
+    background: #04932f;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 6px;
+}
+
+.faan-logo {
+    display: block;
+    margin: 0 auto 20px auto;
+    width: 120px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.topbar {
+    color: #ffffff;
+    font-family: Poppins;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+    background: #04932f;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    min-height: 56px;
+}
+
+ul.topbar-items {
+    font-weight: 500;
+}
+
+.topbar-items>.nav-item, .logobar-items>.nav-item, .navbar-items>.nav-item, .sticky-head .topbar-items>.nav-item, .sticky-head .logobar-items>.nav-item, .sticky-head .navbar-items>.nav-item {
+    height: auto;
+}
+
+.nav {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+/* Topbar layout improvements */
+.topbar .custom-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 18px;
+}
+
+.topbar-inner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.topbar-items {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.topbar .topbar-items .nav-item .header-topbar-text-1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.topbar .topbar-items .nav-item a {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.topbar .topbar-items .nav-item .header-phone,
+.topbar .topbar-items .nav-item .header-email {
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.custom-address-image img {
+    max-height: 40px;
+    width: auto;
+    display: block !important;
+}
+
+@media (max-width: 768px) {
+    .topbar .custom-container {
+        padding: 8px 12px;
+    }
+    .topbar-items {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 600px) {
+    /* stack topbar items and reduce padding */
+    .topbar .custom-container {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px 12px;
+    }
+
+    .topbar-items {
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .topbar .topbar-items .nav-item {
+        display: flex;
+        justify-content: flex-start;
+        padding: 6px 0;
+    }
+
+    .faan-logo {
+        width: 100px;
+    }
+
+    .login-container,
+    .dashboard-container,
+    .admin-container {
+        margin: 100px auto 20px auto;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 400px) {
+    .topbar .header-topbar-text-1 {
+        font-size: 14px;
+    }
+
+    .custom-address-image img {
+        max-height: 32px;
+    }
+
+    .login-container,
+    .dashboard-container,
+    .admin-container {
+        width: 95%;
+        margin: 110px auto 12px auto;
+    }
+}
