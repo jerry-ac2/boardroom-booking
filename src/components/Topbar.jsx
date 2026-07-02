@@ -18,7 +18,7 @@ export default function Topbar(){
             <div className="nav-item-inner">
               <div className="custom-address-image">
                 <a href="https://www.pebec.gov.ng/reportgov-ng" target="_blank" rel="noreferrer">
-                  <img src="/assets/FAAN_logo-removebg-preview.png" alt="pebec" />
+                  <img src="/dist/assets/FAAN_logo-removebg-preview.png" alt="pebec" />
                 </a>
               </div>
             </div>
