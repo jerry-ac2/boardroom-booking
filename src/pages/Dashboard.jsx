@@ -84,7 +84,7 @@ export default function Dashboard() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-10/12 p-6">
         <div className="faan-logo">
-          <img src="/dist/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
+          <img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
         </div>
         <div
           style={{ display: "flex", alignItems: "center", gap: 12 }}

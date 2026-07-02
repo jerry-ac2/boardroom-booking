@@ -36,7 +36,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col w-5/12 gap-4">
         <div className="faan-logo">
-          <img src="/dist/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
+          <img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
         </div>
         <h2>Staff Login</h2>
         <div className="flex flex-col gap-1">

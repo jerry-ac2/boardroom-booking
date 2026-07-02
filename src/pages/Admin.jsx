@@ -60,7 +60,7 @@ export default function Admin(){
 
   return (
     <div className="admin-container p-6">
-      <div className="faan-logo"><img src="/dist/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
+      <div className="faan-logo"><img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
       <div style={{display:'flex',alignItems:'center',gap:12}} className='justify-between'>
         <h2>Admin Dashboard</h2>
         <button className="btn w-4/12" onClick={()=>navigate('/dashboard')}>Back to Dashboard</button>
