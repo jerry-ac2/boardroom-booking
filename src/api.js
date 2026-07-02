@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API = 'https://boardroom-backend-m7cz.onrender.com'|| import.meta.env.VITE_API_URL;
 
 async function handleResponse(res, silent = false) {
   let data = {}
