@@ -29,7 +29,7 @@ export default function Signup(){
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="w-4.5/12 flex flex-col gap-3">
-        <div className="faan-logo"><img src="assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
+        <div className="faan-logo"><img src="/dist/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
         <h2>Staff Signup</h2>
         <div className='flex gap-3'>
         <input className="input" placeholder="Full name" value={name} onChange={e=>setName(e.target.value)} />
