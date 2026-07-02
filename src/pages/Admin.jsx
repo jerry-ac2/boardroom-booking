@@ -5,16 +5,24 @@ import { jsPDF } from 'jspdf'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
+import ConfirmationDialog from '../components/ConfirmationDialog'
+import Skeleton from '../components/Skeleton'
 import { formatDateTime, formatDateTimeRange } from '../utils/dateTime'
 
 export default function Admin(){
   const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pendingCancelId, setPendingCancelId] = useState(null)
+  const [busyId, setBusyId] = useState(null)
   const navigate = useNavigate()
 
   useEffect(()=>{ loadAll() }, [])
 
   async function loadAll(){
+    setLoading(true)
     const r = await get('/admin/bookings')
+    setLoading(false)
     if(!r.ok){
       if(r.status===401){ toast.error('Session expired'); localStorage.removeItem('token'); localStorage.removeItem('staff'); navigate('/login') }
       return
@@ -22,21 +30,46 @@ export default function Admin(){
     setBookings(r.data || [])
   }
 
-  async function approve(id){ const r = await post('/admin/bookings/approve', { id }); if(r.ok) loadAll() }
-  async function reject(id){ const r = await post('/admin/bookings/reject', { id }); if(r.ok) loadAll() }
-  async function batchApprove(){ const ids = getSelectedIds(); if(!ids.length) return toast.warn('Select at least one booking'); const r = await post('/admin/bookings/batch/approve', { ids }); if(r.ok) loadAll() }
-  async function batchReject(){ const ids = getSelectedIds(); if(!ids.length) return toast.warn('Select at least one booking'); const reason = prompt('Optional reason'); const r = await post('/admin/bookings/batch/reject', { ids, reason }); if(r.ok) loadAll() }
+  async function approve(id){
+    setBusyId(id)
+    const r = await post('/admin/bookings/approve', { id })
+    setBusyId(null)
+    if(r.ok) loadAll()
+  }
+
+  async function reject(id){
+    setBusyId(id)
+    const r = await post('/admin/bookings/reject', { id })
+    setBusyId(null)
+    if(r.ok) loadAll()
+  }
+
+  async function batchApprove(){
+    const ids = getSelectedIds()
+    if(!ids.length) return toast.warn('Select at least one booking')
+    const r = await post('/admin/bookings/batch/approve', { ids })
+    if(r.ok) loadAll()
+  }
 
   function getSelectedIds(){
     return Array.from(document.querySelectorAll('#all-bookings tbody input[type=checkbox]:checked')).map(i=>parseInt(i.value,10))
   }
 
-  async function removeBooking(id){
-    if(!confirm('Cancel this booking?')) return
-    const r = await fetch(`${import.meta.env.VITE_API_URL||'http://localhost:3000'}/admin/bookings/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
+  function handleCancel(id){
+    setPendingCancelId(id)
+    setConfirmOpen(true)
+  }
+
+  async function confirmCancel(){
+    if (!pendingCancelId) return
+    setBusyId(pendingCancelId)
+    setConfirmOpen(false)
+    const r = await fetch(`${import.meta.env.VITE_API_URL||'http://localhost:3000'}/admin/bookings/${pendingCancelId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } })
+    setBusyId(null)
     const data = await r.json().catch(()=>({}))
     if(!r.ok){ toast.error(data.message || 'Failed'); return }
     toast.success('Booking cancelled')
+    setPendingCancelId(null)
     loadAll()
   }
 
@@ -66,50 +99,76 @@ export default function Admin(){
         <button className="btn admin-back-button" onClick={()=>navigate('/dashboard')}>Back to Dashboard</button>
       </div>
       <div className="table-responsive">
-        <table id="all-bookings" className="w-full border-collapse admin-table">
-          <thead>
-            <tr>
-              <th></th>
-              <th>Staff Name</th>
-              <th>Department</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Purpose</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.length===0 ? (
-              <tr><td colSpan={8} className="text-center">No bookings yet</td></tr>
-            ) : bookings.map(b => (
-              <tr key={b.id}>
-                <td data-label="Select"><input type="checkbox" value={b.id} /></td>
-                <td data-label="Staff Name">{b.name}</td>
-                <td data-label="Department">{b.directorate}</td>
-                <td data-label="Start">{formatDateTime(b.start_time)}</td>
-                <td data-label="End">{formatDateTime(b.end_time)}</td>
-                <td data-label="Purpose">{b.purpose}</td>
-                <td data-label="Status"><StatusBadge status={b.status} /></td>
-                <td data-label="Action" className='actions'>
-                  {b.status==='pending' && (
-                    <>
-                      <button className="approve-btn" onClick={()=>approve(b.id)}>Approve</button>
-                      <button className="reject-btn" onClick={()=>reject(b.id)}>Reject</button>
-                    </>
-                  )}
-                  <button className="reject-btn bg-white text-black border-2 border-black" onClick={()=>removeBooking(b.id)}>Cancel</button>
-                  {/* <a href={`http://localhost:3000/booking/booking/${b.id}/ics`} style={{marginLeft:8}}>ICS</a> */}
-                </td>
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+          </div>
+        ) : (
+          <table id="all-bookings" className="w-full border-collapse admin-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Staff Name</th>
+                <th>Department</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {bookings.length===0 ? (
+                <tr><td colSpan={8} className="text-center">No bookings yet. Use the dashboard to add new bookings.</td></tr>
+              ) : bookings.map(b => (
+                <tr key={b.id}>
+                  <td data-label="Select"><input type="checkbox" value={b.id} /></td>
+                  <td data-label="Staff Name">{b.name}</td>
+                  <td data-label="Department">{b.directorate}</td>
+                  <td data-label="Start">{formatDateTime(b.start_time)}</td>
+                  <td data-label="End">{formatDateTime(b.end_time)}</td>
+                  <td data-label="Purpose">{b.purpose}</td>
+                  <td data-label="Status"><StatusBadge status={b.status} /></td>
+                  <td data-label="Action" className='actions'>
+                    {b.status==='pending' && (
+                      <>
+                        <button className="approve-btn" onClick={()=>approve(b.id)} disabled={busyId === b.id}>
+                          {busyId === b.id ? 'Working…' : 'Approve'}
+                        </button>
+                        <button className="reject-btn" onClick={()=>reject(b.id)} disabled={busyId === b.id}>
+                          {busyId === b.id ? 'Working…' : 'Reject'}
+                        </button>
+                      </>
+                    )}
+                    <button
+                      className="reject-btn bg-white text-black border-2 border-black"
+                      onClick={() => handleCancel(b.id)}
+                      disabled={busyId === b.id}
+                    >
+                      Cancel
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
       <div className="admin-actions btn-group">
         <button className="export-btn" onClick={exportAllExcel}>Export All Bookings (Excel)</button>
         <button className="export-btn" onClick={exportAllPDF}>Export PDF</button>
       </div>
+      <ConfirmationDialog
+        open={confirmOpen}
+        title="Cancel booking"
+        description="Are you sure you want to cancel this booking? This action cannot be undone."
+        confirmLabel="Yes, cancel booking"
+        cancelLabel="No, keep booking"
+        onConfirm={confirmCancel}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </div>
   )
 }
