@@ -10,19 +10,19 @@ body {
     font-family: 'Poppins', Arial, sans-serif;
     background: #f4f4f4;
     /* reserve space for the fixed topbar */
-    padding-top: 72px;
+    padding-top: 140px;
 }
 
 .login-container,
 .dashboard-container,
 .admin-container {
     width: 90%;
-    max-width: 900px;
-    margin: 80px auto 40px auto;
+    max-width: 1200px;
+    margin:40px auto 40px auto;
     background: white;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 0 10px #ccc;
+    /* box-shadow: 0 0 10px #ccc; */
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -41,6 +41,10 @@ body {
     flex-wrap: wrap;
     gap: 12px;
     justify-content: flex-end;
+}
+
+.admin-back-button {
+    max-width: 240px;
 }
 
 .table-responsive {
@@ -160,6 +164,13 @@ table th {
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+}
+
+.admin-table td.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
 }
 
 /* Dashboard responsive layout: form + side panel */
@@ -296,6 +307,10 @@ ul.topbar-items {
 }
 
 @media (max-width: 768px) {
+    body {
+        padding-top: 180px;
+    }
+
     .topbar .custom-container {
         padding: 8px 12px;
     }
@@ -334,6 +349,111 @@ ul.topbar-items {
     .admin-container {
         margin: 100px auto 20px auto;
         padding: 16px;
+        max-width: 100%;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        text-align: center;
+    }
+
+    .admin-actions {
+        justify-content: stretch;
+    }
+
+    .admin-back-button {
+        display: block;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .admin-actions .export-btn,
+    .admin-actions .btn {
+        width: 100%;
+    }
+
+    .admin-table,
+    .admin-table thead,
+    .admin-table tbody,
+    .admin-table th,
+    .admin-table td,
+    .admin-table tr {
+        display: block;
+    }
+
+    .admin-table thead {
+        display: none;
+    }
+
+    .admin-table tr {
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        margin-bottom: 18px;
+        padding: 18px 16px;
+        background: #ffffff;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .admin-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 10px 0;
+        border: none;
+        min-height: 40px;
+        flex-wrap: wrap;
+    }
+
+    .admin-table td > * {
+        min-width: 0;
+    }
+
+    .admin-table td:before {
+        content: attr(data-label);
+        flex: 0 0 120px;
+        max-width: 120px;
+        font-weight: 700;
+        color: #334155;
+        white-space: normal;
+    }
+
+    .admin-table td:not(.actions):not([data-label="Select"]) {
+        align-items: center;
+    }
+
+    .admin-table td.actions {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding-top: 12px;
+    }
+
+    .admin-table td.actions button,
+    .admin-table td.actions .btn {
+        width: 100%;
+    }
+
+    .admin-table td[data-label="Select"] {
+        align-items: center;
+    }
+
+    .admin-table td[data-label="Select"]:before {
+        display: none;
+    }
+
+    .admin-table td[data-label="Purpose"] {
+        min-height: auto;
+    }
+
+    .admin-table td[data-label="Select"] input {
+        margin: 0;
+        transform: scale(1.1);
     }
 }
 

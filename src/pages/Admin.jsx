@@ -63,10 +63,10 @@ export default function Admin(){
       <div className="faan-logo"><img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
       <div className="admin-header">
         <h2>Admin Dashboard</h2>
-        <button className="btn w-4/12" onClick={()=>navigate('/dashboard')}>Back to Dashboard</button>
+        <button className="btn admin-back-button" onClick={()=>navigate('/dashboard')}>Back to Dashboard</button>
       </div>
       <div className="table-responsive">
-        <table id="all-bookings" className="w-full border-collapse">
+        <table id="all-bookings" className="w-full border-collapse admin-table">
           <thead>
             <tr>
               <th></th>
@@ -84,14 +84,14 @@ export default function Admin(){
               <tr><td colSpan={8} className="text-center">No bookings yet</td></tr>
             ) : bookings.map(b => (
               <tr key={b.id}>
-                <td><input type="checkbox" value={b.id} /></td>
-                <td>{b.name}</td>
-                <td>{b.directorate}</td>
-                <td>{formatDateTime(b.start_time)}</td>
-                <td>{formatDateTime(b.end_time)}</td>
-                <td>{b.purpose}</td>
-                <td><StatusBadge status={b.status} /></td>
-                <td className='flex flex-col gap-3 items-center justify-center'>
+                <td data-label="Select"><input type="checkbox" value={b.id} /></td>
+                <td data-label="Staff Name">{b.name}</td>
+                <td data-label="Department">{b.directorate}</td>
+                <td data-label="Start">{formatDateTime(b.start_time)}</td>
+                <td data-label="End">{formatDateTime(b.end_time)}</td>
+                <td data-label="Purpose">{b.purpose}</td>
+                <td data-label="Status"><StatusBadge status={b.status} /></td>
+                <td data-label="Action" className='actions'>
                   {b.status==='pending' && (
                     <>
                       <button className="approve-btn" onClick={()=>approve(b.id)}>Approve</button>
