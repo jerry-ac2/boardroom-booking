@@ -23,6 +23,53 @@ body {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0 10px #ccc;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.admin-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 8px;
+}
+
+.table-responsive table th,
+.table-responsive table td {
+    padding: 12px 14px;
+    vertical-align: middle;
+}
+
+.table-responsive table tbody tr {
+    border-bottom: 1px solid #ececec;
+}
+
+.table-responsive table td.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.faan-logo {
+    display: block;
+    margin: 0 auto 24px auto;
+    width: 120px;
 }
 
 h2, h3 {

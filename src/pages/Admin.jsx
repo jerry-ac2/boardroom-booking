@@ -61,7 +61,7 @@ export default function Admin(){
   return (
     <div className="admin-container p-6">
       <div className="faan-logo"><img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
-      <div style={{display:'flex',alignItems:'center',gap:12}} className='justify-between'>
+      <div className="admin-header">
         <h2>Admin Dashboard</h2>
         <button className="btn w-4/12" onClick={()=>navigate('/dashboard')}>Back to Dashboard</button>
       </div>
@@ -106,7 +106,7 @@ export default function Admin(){
           </tbody>
         </table>
       </div>
-      <div className="mt-4">
+      <div className="admin-actions btn-group">
         <button className="export-btn" onClick={exportAllExcel}>Export All Bookings (Excel)</button>
         <button className="export-btn" onClick={exportAllPDF}>Export PDF</button>
       </div>
