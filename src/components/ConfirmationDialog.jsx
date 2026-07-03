@@ -29,6 +29,8 @@ export default function ConfirmationDialog({
   useEffect(() => {
     if (!open) return
     previousActiveElement.current = document.activeElement
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const timer = window.setTimeout(() => {
       firstButtonRef.current?.focus()
     }, 0)
@@ -61,6 +63,7 @@ export default function ConfirmationDialog({
       document.removeEventListener('keydown', onKeyDown)
       previousActiveElement.current?.focus()
       window.clearTimeout(timer)
+      document.body.style.overflow = prevOverflow
     }
   }, [open, onCancel])
 

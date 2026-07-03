@@ -7,6 +7,8 @@ import DailySchedule from "../components/DailySchedule";
 import Spinner from "../components/Spinner";
 import StatusBadge from "../components/StatusBadge";
 import { formatDate, formatDateTimeRange, formatTime } from "../utils/dateTime";
+import ConfirmationDialog from "../components/ConfirmationDialog";
+import { FaSignOutAlt } from 'react-icons/fa'
 
 export default function Dashboard() {
   const staff = JSON.parse(localStorage.getItem("staff") || "null");
@@ -17,6 +19,12 @@ export default function Dashboard() {
   const [purpose, setPurpose] = useState("");
   const [loading, setLoading] = useState(false);
   const [conflictsHtml, setConflictsHtml] = useState(null);
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
+
+  async function loadMyBookings() {
+    const r = await get("/booking/my");
+    if (r.ok) setBookings(r.data || []);
+  }
 
   useEffect(() => {
     if (!staff) {
@@ -26,14 +34,13 @@ export default function Dashboard() {
   }, []);
 
   function logout() {
+    setConfirmLogoutOpen(true);
+  }
+
+  function performLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("staff");
     navigate("/login");
-  }
-
-  async function loadMyBookings() {
-    const r = await get("/booking/my");
-    if (r.ok) setBookings(r.data || []);
   }
 
   async function bookRoom() {
@@ -81,8 +88,8 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-10/12 p-6">
+    <div className="min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="faan-logo">
           <img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
         </div>
@@ -99,11 +106,11 @@ export default function Dashboard() {
             </a>
           )}
           <button
-            className="btn bg-red-500 w-4/12"
+            className="btn bg-red-500 w-2/12"
             onClick={logout}
             style={{ marginLeft: 12 }}
           >
-            Logout
+            <span className="icon-left"><FaSignOutAlt /></span> Logout
           </button>
         </div>
         <h3>Book the Board Room</h3>
@@ -127,16 +134,13 @@ export default function Dashboard() {
               <button className="btn" onClick={bookRoom} disabled={loading}>
                 {loading ? (
                   <>
-                    <Spinner size={14} />{" "}
+                    <Spinner size={14} /> {" "}
                     <span style={{ marginLeft: 8 }}>Submitting...</span>
                   </>
                 ) : (
                   "Submit Booking"
                 )}
               </button>
-              {/* <button className="btn" onClick={joinWaitingList}>
-                Join Waiting List
-              </button> */}
             </div>
             <div
               id="booking-conflicts"
@@ -162,14 +166,14 @@ export default function Dashboard() {
                     <strong>Date:</strong> {formatDate(b.start_time)}
                   </div>
                   <div className="flex gap-3">
-                    <strong>Time:</strong> {formatTime(b.start_time)} -{" "}
+                    <strong>Time:</strong> {formatTime(b.start_time)} - {" "}
                     {formatTime(b.end_time)}
                   </div>
                   <div className="flex gap-3">
                     <strong>Purpose:</strong> {b.purpose}
                   </div>
                   <div className="flex gap-3 items-center">
-                    <strong>Status:</strong> <StatusBadge status={b.status} />{" "}
+                    <strong>Status:</strong> <StatusBadge status={b.status} /> {" "}
                     {b.status === "approved" && (
                       <a
                         href={`http://localhost:3000/booking/booking/${b.id}/ics`}
@@ -184,6 +188,16 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        <ConfirmationDialog
+          open={confirmLogoutOpen}
+          title="Log out"
+          description="Are you sure you want to log out? You will need to sign in again to continue."
+          confirmLabel="Yes, log out"
+          cancelLabel="Cancel"
+          onConfirm={() => { performLogout(); setConfirmLogoutOpen(false); }}
+          onCancel={() => setConfirmLogoutOpen(false)}
+        />
       </div>
     </div>
   );

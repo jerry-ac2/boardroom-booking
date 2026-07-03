@@ -65,8 +65,8 @@ export default function Signup(){
     password.length >= 8
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-4.5/12 flex flex-col gap-3">
+    <div className="min-h-screen">
+      <div className="mx-auto w-full max-w-lg px-4 flex flex-col gap-3">
         <div className="faan-logo"><img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
         <h2>Staff Signup</h2>
         <form onSubmit={handleSubmit} noValidate>

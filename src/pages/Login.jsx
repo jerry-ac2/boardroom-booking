@@ -50,8 +50,8 @@ export default function Login() {
   const isFormValid = !loading && emailRegex.test(email) && password.length > 0;
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col w-5/12 gap-4">
+    <div className="min-h-screen">
+      <div className="mx-auto w-full max-w-md px-4 flex flex-col gap-4">
         <div className="faan-logo">
           <img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
         </div>

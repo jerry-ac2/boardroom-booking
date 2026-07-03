@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import StatusBadge from '../components/StatusBadge'
 import ConfirmationDialog from '../components/ConfirmationDialog'
 import Skeleton from '../components/Skeleton'
+import { FaCheck, FaTimes, FaTrash, FaFileExcel, FaFilePdf } from 'react-icons/fa'
 import { formatDateTime, formatDateTimeRange } from '../utils/dateTime'
 
 export default function Admin(){
@@ -135,10 +136,10 @@ export default function Admin(){
                     {b.status==='pending' && (
                       <>
                         <button className="approve-btn" onClick={()=>approve(b.id)} disabled={busyId === b.id}>
-                          {busyId === b.id ? 'Working…' : 'Approve'}
+                          <span className="icon-left"><FaCheck /></span> {busyId === b.id ? 'Working…' : 'Approve'}
                         </button>
                         <button className="reject-btn" onClick={()=>reject(b.id)} disabled={busyId === b.id}>
-                          {busyId === b.id ? 'Working…' : 'Reject'}
+                          <span className="icon-left"><FaTimes /></span> {busyId === b.id ? 'Working…' : 'Reject'}
                         </button>
                       </>
                     )}
@@ -157,8 +158,8 @@ export default function Admin(){
         )}
       </div>
       <div className="admin-actions btn-group">
-        <button className="export-btn" onClick={exportAllExcel}>Export All Bookings (Excel)</button>
-        <button className="export-btn" onClick={exportAllPDF}>Export PDF</button>
+        <button className="export-btn" onClick={exportAllExcel}><span className="icon-left"><FaFileExcel /></span>Export All Bookings (Excel)</button>
+        <button className="export-btn" onClick={exportAllPDF}><span className="icon-left"><FaFilePdf /></span>Export PDF</button>
       </div>
       <ConfirmationDialog
         open={confirmOpen}

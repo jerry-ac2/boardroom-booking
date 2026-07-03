@@ -212,6 +212,67 @@ table th {
     border: 1px solid #ccc;
 }
 
+/* Icon helper: left-aligned icons inside buttons */
+.icon-left {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    line-height: 0;
+}
+
+.icon-left svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+}
+
+/* Modal / ConfirmationDialog styles */
+.dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 24px;
+}
+
+.dialog-panel {
+    background: #ffffff;
+    border-radius: 10px;
+    max-width: 560px;
+    width: 100%;
+    box-shadow: 0 12px 30px rgba(2,6,23,0.2);
+    padding: 20px;
+}
+
+.dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dialog-body {
+    margin-top: 12px;
+}
+
+.dialog-actions {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.dialog-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+}
+
 .table-responsive {
     width: 100%;
     overflow-x: auto;
