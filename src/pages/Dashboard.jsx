@@ -1,204 +1,84 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { get, post } from "../api";
-import { toast } from "react-toastify";
-import DateTimePicker from "../components/DateTimePicker";
-import DailySchedule from "../components/DailySchedule";
-import Spinner from "../components/Spinner";
-import StatusBadge from "../components/StatusBadge";
-import { formatDate, formatDateTimeRange, formatTime } from "../utils/dateTime";
-import ConfirmationDialog from "../components/ConfirmationDialog";
-import { FaSignOutAlt } from 'react-icons/fa'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { CalendarDays, ChevronRight, ClipboardCheck, Clock3, Download, LayoutDashboard, LogOut, Plus, ShieldCheck } from 'lucide-react'
+import { get, post } from '../api'
+import DateTimePicker from '../components/DateTimePicker'
+import DailySchedule from '../components/DailySchedule'
+import StatusBadge from '../components/StatusBadge'
+import ConfirmationDialog from '../components/ConfirmationDialog'
+import Spinner from '../components/Spinner'
+import { formatDate, formatDateTime, formatTime } from '../utils/dateTime'
+
+function beginningOfToday() {
+  const now = new Date()
+  now.setHours(9, 0, 0, 0)
+  return now.toISOString().slice(0, 16)
+}
 
 export default function Dashboard() {
-  const staff = JSON.parse(localStorage.getItem("staff") || "null");
-  const navigate = useNavigate();
-  const [bookings, setBookings] = useState([]);
-  const [start, setStart] = useState("");
-  const [end, setEnd] = useState("");
-  const [purpose, setPurpose] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [conflictsHtml, setConflictsHtml] = useState(null);
-  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
+  const staff = useMemo(() => JSON.parse(localStorage.getItem('staff') || 'null'), [])
+  const navigate = useNavigate()
+  const [bookings, setBookings] = useState([])
+  const [loadingBookings, setLoadingBookings] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [logoutOpen, setLogoutOpen] = useState(false)
+  const [start, setStart] = useState(beginningOfToday)
+  const [end, setEnd] = useState('')
+  const [purpose, setPurpose] = useState('')
+  const [formError, setFormError] = useState('')
 
-  async function loadMyBookings() {
-    const r = await get("/booking/my");
-    if (r.ok) setBookings(r.data || []);
+  async function loadBookings() {
+    setLoadingBookings(true)
+    const response = await get('/booking/my', { silent: true })
+    if (response.ok) setBookings(response.data?.bookings || response.data || [])
+    setLoadingBookings(false)
   }
 
-  useEffect(() => {
-    if (!staff) {
-      toast.error("Session expired. Please login again.");
-      navigate("/login");
-    } else loadMyBookings();
-  }, []);
+  useEffect(() => { loadBookings() }, [])
+
+  async function submitBooking(event) {
+    event.preventDefault()
+    setFormError('')
+    if (!start || !end || !purpose.trim()) return setFormError('Add a meeting purpose, start time, and end time to submit this request.')
+    if (new Date(end) <= new Date(start)) return setFormError('The meeting end time must be later than the start time.')
+    setSubmitting(true)
+    const response = await post('/booking/book', { start_time: new Date(start).toISOString(), end_time: new Date(end).toISOString(), purpose: purpose.trim() })
+    setSubmitting(false)
+    if (!response.ok) {
+      const conflicts = response.data?.conflicts
+      return setFormError(conflicts?.length ? `The selected time conflicts with ${conflicts.length} existing request${conflicts.length === 1 ? '' : 's'}. Please choose another meeting window.` : (response.data?.message || 'We could not submit this booking request.'))
+    }
+    setPurpose('')
+    setEnd('')
+    loadBookings()
+  }
 
   function logout() {
-    setConfirmLogoutOpen(true);
+    localStorage.removeItem('token')
+    localStorage.removeItem('staff')
+    navigate('/login')
   }
 
-  function performLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("staff");
-    navigate("/login");
-  }
+  const pending = bookings.filter((item) => item.status === 'pending').length
+  const approved = bookings.filter((item) => item.status === 'approved' || item.status === 'confirmed').length
+  const nextBooking = bookings.filter((item) => new Date(item.end_time) >= new Date()).sort((a, b) => new Date(a.start_time) - new Date(b.start_time))[0]
 
-  async function bookRoom() {
-    if (!start || !end || !purpose) {
-      toast.warn("Please fill all booking fields");
-      return;
-    }
-    setLoading(true);
-    const r = await post("/booking/book", {
-      start_time: new Date(start).toISOString(),
-      end_time: new Date(end).toISOString(),
-      purpose,
-    });
-    setLoading(false);
-    if (!r.ok) {
-      if (r.status === 409 && r.data && r.data.conflicts) {
-        const conflicts = r.data.conflicts;
-        setConflictsHtml(
-          conflicts
-            .map(
-              (c) =>
-                `${c.id} (${c.status}) ${formatDateTimeRange(c.start_time, c.end_time)} - ${c.purpose || ""}`,
-            )
-            .join("\n"),
-        );
-      }
-      return;
-    }
-    toast.success("Booking submitted");
-    setStart("");
-    setEnd("");
-    setPurpose("");
-    setConflictsHtml(null);
-    loadMyBookings();
-  }
-
-  async function joinWaitingList() {
-    const r = await post("/booking/waitlist", {
-      staff_id: staff.id,
-      start_time: new Date(start).toISOString(),
-      end_time: new Date(end).toISOString(),
-    });
-    if (r.ok) toast.success("Added to waiting list");
-    else if (r.data && r.data.message) toast.warn(r.data.message);
-  }
-
-  return (
-    <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="faan-logo">
-          <img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
-        </div>
-        <div
-          style={{ display: "flex", alignItems: "center", gap: 12 }}
-          className="justify-between bg-gray-100 p-4 rounded-xl mb-6"
-        >
-          <h2>
-            Welcome, <span id="staff-name">{staff && staff.name}</span>
-          </h2>
-          {staff && staff.isAdmin && (
-            <a className="admin-access-btn" href="/admin">
-              Admin
-            </a>
-          )}
-          <button
-            className="btn bg-red-500 w-2/12"
-            onClick={logout}
-            style={{ marginLeft: 12 }}
-          >
-            <span className="icon-left"><FaSignOutAlt /></span> Logout
-          </button>
-        </div>
-        <h3>Book the Board Room</h3>
-        <p className="font-semibold text-center">
-          <strong>Room:</strong> Managing Director office board room booking
-        </p>
-        <div className="flex flex-col md:flex-row gap-6 mt-6">
-          <div className="booking-form">
-            <div className="flex flex-col md:flex-row gap-2">
-              <DateTimePicker label="Start" value={start} onChange={setStart} />
-              <DateTimePicker label="End" value={end} onChange={setEnd} />
-            </div>
-            <input
-              className="input mt-3"
-              type="text"
-              placeholder="Purpose of Meeting"
-              value={purpose}
-              onChange={(e) => setPurpose(e.target.value)}
-            />
-            <div className="flex flex-col gap-2 items-center mt-2">
-              <button className="btn" onClick={bookRoom} disabled={loading}>
-                {loading ? (
-                  <>
-                    <Spinner size={14} /> {" "}
-                    <span style={{ marginLeft: 8 }}>Submitting...</span>
-                  </>
-                ) : (
-                  "Submit Booking"
-                )}
-              </button>
-            </div>
-            <div
-              id="booking-conflicts"
-              style={{
-                marginTop: 12,
-                color: "#b30000",
-                whiteSpace: "pre-wrap",
-              }}
-            >
-              {conflictsHtml}
-            </div>
-          </div>
-
-          <div className="w-full md:w-1/2 bg-gray-50 p-4 rounded-xl">
-            <DailySchedule date={start ? start.split("T")[0] : null} />
-            <h3>My Bookings</h3>
-            {bookings.length === 0 ? (
-              <div className="booking-card">No bookings found</div>
-            ) : (
-              bookings.map((b) => (
-                <div className="flex flex-col border-b-2 pb-4 gap-2" key={b.id}>
-                  <div className="flex gap-3">
-                    <strong>Date:</strong> {formatDate(b.start_time)}
-                  </div>
-                  <div className="flex gap-3">
-                    <strong>Time:</strong> {formatTime(b.start_time)} - {" "}
-                    {formatTime(b.end_time)}
-                  </div>
-                  <div className="flex gap-3">
-                    <strong>Purpose:</strong> {b.purpose}
-                  </div>
-                  <div className="flex gap-3 items-center">
-                    <strong>Status:</strong> <StatusBadge status={b.status} /> {" "}
-                    {b.status === "approved" && (
-                      <a
-                        href={`http://localhost:3000/booking/booking/${b.id}/ics`}
-                        style={{ marginLeft: 8 }}
-                      >
-                        ICS
-                      </a>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <ConfirmationDialog
-          open={confirmLogoutOpen}
-          title="Log out"
-          description="Are you sure you want to log out? You will need to sign in again to continue."
-          confirmLabel="Yes, log out"
-          cancelLabel="Cancel"
-          onConfirm={() => { performLogout(); setConfirmLogoutOpen(false); }}
-          onCancel={() => setConfirmLogoutOpen(false)}
-        />
+  return <div className="app-shell">
+    <aside className="app-sidebar" aria-label="Primary navigation">
+      <Link to="/dashboard" className="brand-lockup"><img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /><span><b>Boardroom</b><small>MD Office</small></span></Link>
+      <nav className="side-nav"><Link className="side-nav__item side-nav__item--active" to="/dashboard"><LayoutDashboard /> Overview</Link><a className="side-nav__item" href="#new-request"><Plus /> New request</a><a className="side-nav__item" href="#my-bookings"><CalendarDays /> My bookings</a>{staff?.isAdmin && <Link className="side-nav__item" to="/admin"><ShieldCheck /> Approval centre</Link>}</nav>
+      <div className="sidebar-foot"><div className="profile-initial">{(staff?.name || 'S').slice(0, 1)}</div><div><strong>{staff?.name || 'FAAN Staff'}</strong><span>{staff?.directorate || 'Staff account'}</span></div></div>
+    </aside>
+    <main className="app-main">
+      <header className="workspace-header"><div><p className="eyebrow">Managing Director’s Office</p><h1>Boardroom operations</h1></div><div className="header-actions">{staff?.isAdmin && <Link to="/admin" className="quiet-link">Review requests <ChevronRight /></Link>}<button className="icon-button" onClick={() => setLogoutOpen(true)} aria-label="Log out"><LogOut /></button></div></header>
+      <section className="welcome-strip"><div><span className="welcome-strip__mark"><ClipboardCheck /></span><div><p>Good day, {staff?.name?.split(' ')[0] || 'colleague'}.</p><span>Plan, request, and track official boardroom engagements from one place.</span></div></div><span className="room-label"><span /> MD Boardroom · Room 01</span></section>
+      <section className="metric-grid" aria-label="Booking summary"><article><span>Upcoming meetings</span><strong>{approved}</strong><small>Approved or confirmed</small></article><article><span>Requests awaiting decision</span><strong>{pending}</strong><small>We’ll notify you when reviewed</small></article><article className="metric-grid__next"><span>Next scheduled meeting</span><strong>{nextBooking ? formatDate(nextBooking.start_time) : 'No meeting scheduled'}</strong><small>{nextBooking ? `${formatTime(nextBooking.start_time)} · ${nextBooking.purpose}` : 'Submit a request to reserve the boardroom'}</small></article></section>
+      <div className="dashboard-layout">
+        <section id="new-request" className="surface booking-surface"><div className="section-heading"><div><p className="eyebrow">New booking request</p><h2>Reserve the MD Boardroom</h2></div><span className="section-step">01 / 01</span></div><p className="section-intro">Requests are reviewed by the MD Office team. Check availability before selecting your meeting window.</p><form onSubmit={submitBooking}><div className="form-grid"><DateTimePicker label="Meeting starts" value={start} onChange={setStart} /><DateTimePicker label="Meeting ends" value={end} onChange={setEnd} minDate={start ? new Date(start) : undefined} /></div><label className="field-label" htmlFor="meeting-purpose">Meeting purpose</label><textarea id="meeting-purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder="e.g. Aviation safety directorate briefing…" rows="4" /><div className="request-footer"><span className="availability-note"><Clock3 /> Standard meeting slot: 30 minutes minimum</span><button className="primary-button" disabled={submitting}>{submitting ? <><Spinner size={15} /> Submitting…</> : <>Submit request <ChevronRight /></>}</button></div>{formError && <p className="form-error" role="alert">{formError}</p>}</form></section>
+        <aside className="availability-panel"><DailySchedule date={start ? start.split('T')[0] : null} /><div className="availability-legend"><span><i className="legend-open" /> Available</span><span><i className="legend-pending" /> Pending</span><span><i className="legend-booked" /> Reserved</span></div></aside>
       </div>
-    </div>
-  );
+      <section id="my-bookings" className="surface bookings-surface"><div className="section-heading"><div><p className="eyebrow">Your activity</p><h2>My booking requests</h2></div><span className="records-count">{bookings.length} record{bookings.length === 1 ? '' : 's'}</span></div>{loadingBookings ? <div className="booking-loading"><Spinner /> Loading requests…</div> : bookings.length === 0 ? <div className="empty-state"><CalendarDays /><h3>No requests yet</h3><p>Your boardroom requests will appear here with their approval status.</p><a href="#new-request">Create a booking request <ChevronRight /></a></div> : <div className="booking-list">{bookings.map((booking) => <article className="booking-row" key={booking.id}><div className="booking-date"><strong>{new Date(booking.start_time).getDate()}</strong><span>{new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(booking.start_time))}</span></div><div className="booking-detail"><strong>{booking.purpose}</strong><span>{formatDateTime(booking.start_time)} – {formatTime(booking.end_time)}</span></div><StatusBadge status={booking.status} />{booking.status === 'approved' && <a className="calendar-link" href={`${import.meta.env.VITE_API_URL || 'https://boardroom-backend-m7cz.onrender.com'}/booking/booking/${booking.id}/ics`}><Download /> Calendar</a>}</article>)}</div>}</section>
+    </main>
+    <ConfirmationDialog open={logoutOpen} title="Log out of Boardroom" description="You will need to sign in again to access booking information." confirmLabel="Log out" cancelLabel="Stay signed in" onConfirm={logout} onCancel={() => setLogoutOpen(false)} />
+  </div>
 }

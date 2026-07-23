@@ -57,19 +57,13 @@ export default function Signup(){
     if (field === 'password') setPassword(value)
   }
 
-  const isFormValid =
-    name.trim().length > 0 &&
-    emailRegex.test(email) &&
-    directorate.trim().length > 0 &&
-    staff_no.trim().length > 0 &&
-    password.length >= 8
-
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto w-full max-w-lg px-4 flex flex-col gap-3">
-        <div className="faan-logo"><img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" /></div>
-        <h2>Staff Signup</h2>
-        <form onSubmit={handleSubmit} noValidate>
+    <main className="auth-page">
+      <section className="auth-aside"><div className="auth-aside__content"><p className="eyebrow">Federal Airports Authority of Nigeria</p><h1>Make every official meeting count.</h1><p>Book and track engagements with the Managing Director’s Office.</p><div className="auth-aside__line" /><span>Secure staff access · Official use only</span></div></section>
+      <section className="auth-panel"><div className="auth-card auth-card--signup">
+        <img className="auth-logo" src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
+        <p className="eyebrow">Boardroom Booking</p><h2>Create staff account</h2><p className="auth-card__intro">Your details are used to identify booking requests.</p>
+        <form onSubmit={handleSubmit} noValidate className="auth-form">
           <div className='flex flex-col gap-3'>
             <div className="input-group">
               <label htmlFor="signup-name">Full name</label>
@@ -147,17 +141,16 @@ export default function Signup(){
               autoComplete="new-password"
             />
             {errors.form && <p className="field-error" role="alert">{errors.form}</p>}
-            <LoadingButton type="submit" isLoading={loading} disabled={!isFormValid} className="w-full">
-              Sign Up
+            <LoadingButton type="submit" isLoading={loading} className="primary-button auth-submit">
+              Create account
             </LoadingButton>
           </div>
         </form>
-        <div style={{ marginTop: 12, textAlign: "center" }}>
+        <div className="auth-switch">
           <Link to="/login" className="underline">
-            Already have an account?
+            Already registered? <strong>Sign in</strong>
           </Link>
-        </div>
-      </div>
-    </div>
+        </div></div></section>
+    </main>
   )
 }
