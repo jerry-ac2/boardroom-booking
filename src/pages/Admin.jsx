@@ -166,6 +166,7 @@ export default function Admin(){
         title="Cancel booking"
         description="Are you sure you want to cancel this booking? This action cannot be undone."
         confirmLabel="Yes, cancel booking"
+        confirmVariant="danger"
         cancelLabel="No, keep booking"
         onConfirm={confirmCancel}
         onCancel={() => setConfirmOpen(false)}
