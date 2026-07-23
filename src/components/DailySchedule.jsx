@@ -28,6 +28,12 @@ export default function DailySchedule({ date }) {
   const [slots, setSlots] = useState([])
   const [loading, setLoading] = useState(false)
   const [fetchedDate, setFetchedDate] = useState(null)
+  const [now, setNow] = useState(() => new Date())
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60 * 1000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     if (!date) {
@@ -84,15 +90,17 @@ export default function DailySchedule({ date }) {
     ? new Intl.DateTimeFormat('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(fetchedDate + 'T00:00:00'))
     : ''
 
+  const remainingSlots = slots.filter((slot) => new Date(slot.end).getTime() > now.getTime())
+
   return (
     <div className="daily-schedule">
       <h4 className="daily-schedule__title">Daily Availability</h4>
       {displayDate && <p className="daily-schedule__date">{displayDate}</p>}
-      {slots.length === 0 ? (
-        <p className="daily-schedule__empty">No slot data available for this date.</p>
+      {remainingSlots.length === 0 ? (
+        <p className="daily-schedule__empty">{slots.length ? 'No bookable slots remain for this date.' : 'No slot data available for this date.'}</p>
       ) : (
         <div className="daily-schedule__grid">
-          {slots.map((slot, i) => (
+          {remainingSlots.map((slot, i) => (
             <div key={i} className={`daily-schedule__slot ${statusClass(slot)}`}>
               <span className="daily-schedule__slot-time">
                 {formatSlotTime(slot.start)} – {formatSlotTime(slot.end)}

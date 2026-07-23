@@ -25,8 +25,9 @@ export default function DateTimePicker({
   }, [value])
 
   function commit(nextDate) {
-    setDate(nextDate)
-    onChange(formatLocalDateTimeValue(nextDate))
+    const safeDate = minDate && nextDate < minDate ? new Date(minDate) : nextDate
+    setDate(safeDate)
+    onChange(formatLocalDateTimeValue(safeDate))
   }
 
   function handleSelect(newDay) {
@@ -67,7 +68,7 @@ export default function DateTimePicker({
             selected={date || undefined}
             onSelect={handleSelect}
             disabled={[
-              minDate ? { before: minDate } : undefined,
+              minDate ? { before: new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate()) } : undefined,
               maxDate ? { after: maxDate } : undefined,
             ].filter(Boolean)}
             defaultMonth={date || undefined}

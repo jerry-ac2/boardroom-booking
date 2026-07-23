@@ -9,10 +9,21 @@ import ConfirmationDialog from '../components/ConfirmationDialog'
 import Spinner from '../components/Spinner'
 import { formatDate, formatDateTime, formatTime } from '../utils/dateTime'
 
-function beginningOfToday() {
+function nextBookingStart() {
   const now = new Date()
-  now.setHours(9, 0, 0, 0)
-  return now.toISOString().slice(0, 16)
+  const isAfterOfficeHours = now.getHours() >= 18
+  if (isAfterOfficeHours) {
+    now.setDate(now.getDate() + 1)
+    now.setHours(9, 0, 0, 0)
+    return toLocalDateTimeValue(now)
+  }
+  now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15, 0, 0)
+  return toLocalDateTimeValue(now)
+}
+
+function toLocalDateTimeValue(date) {
+  const pad = (value) => String(value).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 export default function Dashboard() {
@@ -22,7 +33,7 @@ export default function Dashboard() {
   const [loadingBookings, setLoadingBookings] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [logoutOpen, setLogoutOpen] = useState(false)
-  const [start, setStart] = useState(beginningOfToday)
+  const [start, setStart] = useState(nextBookingStart)
   const [end, setEnd] = useState('')
   const [purpose, setPurpose] = useState('')
   const [formError, setFormError] = useState('')
@@ -40,6 +51,7 @@ export default function Dashboard() {
     event.preventDefault()
     setFormError('')
     if (!start || !end || !purpose.trim()) return setFormError('Add a meeting purpose, start time, and end time to submit this request.')
+    if (new Date(start) < new Date()) return setFormError('The meeting start time has already passed. Please choose a future time.')
     if (new Date(end) <= new Date(start)) return setFormError('The meeting end time must be later than the start time.')
     setSubmitting(true)
     const response = await post('/booking/book', { start_time: new Date(start).toISOString(), end_time: new Date(end).toISOString(), purpose: purpose.trim() })
@@ -74,7 +86,7 @@ export default function Dashboard() {
       <section className="welcome-strip"><div><span className="welcome-strip__mark"><ClipboardCheck /></span><div><p>Good day, {staff?.name?.split(' ')[0] || 'colleague'}.</p><span>Plan, request, and track official boardroom engagements from one place.</span></div></div><span className="room-label"><span /> MD Boardroom · Room 01</span></section>
       <section className="metric-grid" aria-label="Booking summary"><article><span>Upcoming meetings</span><strong>{approved}</strong><small>Approved or confirmed</small></article><article><span>Requests awaiting decision</span><strong>{pending}</strong><small>We’ll notify you when reviewed</small></article><article className="metric-grid__next"><span>Next scheduled meeting</span><strong>{nextBooking ? formatDate(nextBooking.start_time) : 'No meeting scheduled'}</strong><small>{nextBooking ? `${formatTime(nextBooking.start_time)} · ${nextBooking.purpose}` : 'Submit a request to reserve the boardroom'}</small></article></section>
       <div className="dashboard-layout">
-        <section id="new-request" className="surface booking-surface"><div className="section-heading"><div><p className="eyebrow">New booking request</p><h2>Reserve the MD Boardroom</h2></div><span className="section-step">01 / 01</span></div><p className="section-intro">Requests are reviewed by the MD Office team. Check availability before selecting your meeting window.</p><form onSubmit={submitBooking}><div className="form-grid"><DateTimePicker label="Meeting starts" value={start} onChange={setStart} /><DateTimePicker label="Meeting ends" value={end} onChange={setEnd} minDate={start ? new Date(start) : undefined} /></div><label className="field-label" htmlFor="meeting-purpose">Meeting purpose</label><textarea id="meeting-purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder="e.g. Aviation safety directorate briefing…" rows="4" /><div className="request-footer"><span className="availability-note"><Clock3 /> Standard meeting slot: 30 minutes minimum</span><button className="primary-button" disabled={submitting}>{submitting ? <><Spinner size={15} /> Submitting…</> : <>Submit request <ChevronRight /></>}</button></div>{formError && <p className="form-error" role="alert">{formError}</p>}</form></section>
+        <section id="new-request" className="surface booking-surface"><div className="section-heading"><div><p className="eyebrow">New booking request</p><h2>Reserve the MD Boardroom</h2></div><span className="section-step">01 / 01</span></div><p className="section-intro">Requests are reviewed by the MD Office team. Check availability before selecting your meeting window.</p><form onSubmit={submitBooking}><div className="form-grid"><DateTimePicker label="Meeting starts" value={start} onChange={setStart} minDate={new Date()} /><DateTimePicker label="Meeting ends" value={end} onChange={setEnd} minDate={start ? new Date(start) : new Date()} /></div><label className="field-label" htmlFor="meeting-purpose">Meeting purpose</label><textarea id="meeting-purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder="e.g. Aviation safety directorate briefing…" rows="4" /><div className="request-footer"><span className="availability-note"><Clock3 /> Standard meeting slot: 30 minutes minimum</span><button className="primary-button" disabled={submitting}>{submitting ? <><Spinner size={15} /> Submitting…</> : <>Submit request <ChevronRight /></>}</button></div>{formError && <p className="form-error" role="alert">{formError}</p>}</form></section>
         <aside className="availability-panel"><DailySchedule date={start ? start.split('T')[0] : null} /><div className="availability-legend"><span><i className="legend-open" /> Available</span><span><i className="legend-pending" /> Pending</span><span><i className="legend-booked" /> Reserved</span></div></aside>
       </div>
       <section id="my-bookings" className="surface bookings-surface"><div className="section-heading"><div><p className="eyebrow">Your activity</p><h2>My booking requests</h2></div><span className="records-count">{bookings.length} record{bookings.length === 1 ? '' : 's'}</span></div>{loadingBookings ? <div className="booking-loading"><Spinner /> Loading requests…</div> : bookings.length === 0 ? <div className="empty-state"><CalendarDays /><h3>No requests yet</h3><p>Your boardroom requests will appear here with their approval status.</p><a href="#new-request">Create a booking request <ChevronRight /></a></div> : <div className="booking-list">{bookings.map((booking) => <article className="booking-row" key={booking.id}><div className="booking-date"><strong>{new Date(booking.start_time).getDate()}</strong><span>{new Intl.DateTimeFormat('en-US', { month: 'short' }).format(new Date(booking.start_time))}</span></div><div className="booking-detail"><strong>{booking.purpose}</strong><span>{formatDateTime(booking.start_time)} – {formatTime(booking.end_time)}</span></div><StatusBadge status={booking.status} />{booking.status === 'approved' && <a className="calendar-link" href={`${import.meta.env.VITE_API_URL || 'https://boardroom-backend-m7cz.onrender.com'}/booking/booking/${booking.id}/ics`}><Download /> Calendar</a>}</article>)}</div>}</section>
