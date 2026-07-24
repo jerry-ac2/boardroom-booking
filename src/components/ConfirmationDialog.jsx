@@ -21,6 +21,7 @@ export default function ConfirmationDialog({
   onConfirm,
   onCancel,
   children,
+  confirmVariant = 'default',
 }) {
   const dialogRef = useRef(null)
   const firstButtonRef = useRef(null)
@@ -84,7 +85,7 @@ export default function ConfirmationDialog({
         </div>
         <div className="dialog-actions">
           <Button variant="outline" onClick={onCancel}>{cancelLabel}</Button>
-          <Button onClick={onConfirm} ref={firstButtonRef}>{confirmLabel}</Button>
+          <Button variant={confirmVariant} onClick={onConfirm} ref={firstButtonRef}>{confirmLabel}</Button>
         </div>
       </div>
     </div>,

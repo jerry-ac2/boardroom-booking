@@ -47,16 +47,13 @@ export default function Login() {
     if (field === "password") setPassword(value);
   }
 
-  const isFormValid = !loading && emailRegex.test(email) && password.length > 0;
-
   return (
-    <div className="min-h-screen">
-      <div className="mx-auto w-full max-w-md px-4 flex flex-col gap-4">
-        <div className="faan-logo">
-          <img src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
-        </div>
-        <h2>Staff Login</h2>
-        <form onSubmit={handleSubmit} noValidate>
+    <main className="auth-page">
+      <section className="auth-aside"><div className="auth-aside__content"><p className="eyebrow">Federal Airports Authority of Nigeria</p><h1>Reserved for decisions that move aviation forward.</h1><p>The Managing Director’s Office boardroom scheduling environment.</p><div className="auth-aside__line" /><span>Secure staff access · Official use only</span></div></section>
+      <section className="auth-panel"><div className="auth-card">
+        <img className="auth-logo" src="/assets/FAAN_logo-removebg-preview.png" alt="FAAN" />
+        <p className="eyebrow">Boardroom Booking</p><h2>Welcome back</h2><p className="auth-card__intro">Sign in to manage your meeting requests.</p>
+        <form onSubmit={handleSubmit} noValidate className="auth-form">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <label htmlFor="login-email">Email</label>
@@ -64,7 +61,7 @@ export default function Login() {
                 id="login-email"
                 className="input"
                 type="email"
-                placeholder="Enter your email address"
+                placeholder="name@faan.gov.ng"
                 value={email}
                 onChange={(e) => handleFieldChange("email", e.target.value)}
                 onBlur={() => setErrors((current) => ({ ...current, ...validate({ email, password }) }))}
@@ -94,17 +91,16 @@ export default function Login() {
                 {errors.form}
               </p>
             )}
-            <LoadingButton type="submit" isLoading={loading} disabled={!isFormValid} className="w-full">
-              Login
+            <LoadingButton type="submit" isLoading={loading} className="primary-button auth-submit">
+              Sign in securely
             </LoadingButton>
           </div>
         </form>
-        <div style={{ marginTop: 12, textAlign: "center" }}>
+        <div className="auth-switch">
           <Link to="/signup" className="underline">
-            Create account
+            Need an account? <strong>Create one</strong>
           </Link>
-        </div>
-      </div>
-    </div>
+        </div></div></section>
+    </main>
   );
 }

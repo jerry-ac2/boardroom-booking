@@ -4,6 +4,7 @@ import { cn } from '../../lib/utils'
 const VARIANT_CLASSES = {
   default: 'ui-button--default',
   outline: 'ui-button--outline',
+  danger: 'ui-button--danger',
 }
 
 const Button = React.forwardRef(function Button(
